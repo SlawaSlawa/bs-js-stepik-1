@@ -1,42 +1,16 @@
 'use strict'
-
-if (!localStorage.getItem('goods')) {
-    localStorage.setItem('goods', JSON.stringify([]))
+const options = {
+    valueNames: ['name', 'price']
 }
 
 const myModal = new bootstrap.Modal(document.getElementById('exampleModal'), {
     keyboard: false
 })
-
-const options = {
-    valueNames: ['name', 'price']
-}
-
 let userList
 
-document.querySelector('button.add_new').addEventListener('click', function(evt) {
-    let name = document.getElementById('good_name').value
-    let price = document.getElementById('good_price').value
-    let count = document.getElementById('good_count').value
-
-    if (name && price && count) {
-        document.getElementById('good_name').value = ''
-        document.getElementById('good_price').value = ''
-        document.getElementById('good_count').value = '1'
-
-        let goods = JSON.parse(localStorage.getItem('goods'))
-        goods.push(['good_' + goods.length, name, price, count, 0, 0, 0])
-        localStorage.setItem('goods', JSON.stringify(goods))
-        update_goods()
-        myModal.hide()
-    } else {
-        Swal.fire({
-            title: "Ошибка",
-            text: "Заполните все поля!",
-            icon: "error"
-        })
-    }
-})
+if (!localStorage.getItem('goods')) {
+    localStorage.setItem('goods', JSON.stringify([]))
+}
 
 function update_goods() {
     let result_price = 0
@@ -92,6 +66,30 @@ function update_goods() {
     document.querySelector('.price_result').innerHTML = result_price + '&#8381;'
 }
 
+document.querySelector('button.add_new').addEventListener('click', function(evt) {
+    let name = document.getElementById('good_name').value
+    let price = document.getElementById('good_price').value
+    let count = document.getElementById('good_count').value
+
+    if (name && price && count) {
+        document.getElementById('good_name').value = ''
+        document.getElementById('good_price').value = ''
+        document.getElementById('good_count').value = '1'
+
+        let goods = JSON.parse(localStorage.getItem('goods'))
+        goods.push(['good_' + goods.length, name, price, count, 0, 0, 0])
+        localStorage.setItem('goods', JSON.stringify(goods))
+        update_goods()
+        myModal.hide()
+    } else {
+        Swal.fire({
+            title: "Ошибка",
+            text: "Заполните все поля!",
+            icon: "error"
+        })
+    }
+})
+
 document.querySelector('.list').addEventListener('click', function(evt) {
     const target = evt.target
     
@@ -124,6 +122,40 @@ document.querySelector('.list').addEventListener('click', function(evt) {
             )
         }
     })
+})
+
+document.querySelector('.list').addEventListener('click', function(evt) {
+    const target = evt.target
+
+    if (!target.dataset.goods) {
+        return
+    }
+    const goods = JSON.parse(localStorage.getItem('goods'))
+    for (let i = 0; i < goods.length; i++) {
+        if (goods[i][3] > 0 && goods[i][0] === target.dataset.goods) {
+            goods[i].splice(3, 1, goods[i][3] - 1)
+            goods[i].splice(4, 1, goods[i][4] + 1)
+            localStorage.setItem('goods', JSON.stringify(goods))
+            update_goods()
+        }
+    }
+})
+
+document.querySelector('.cart').addEventListener('click', function(evt) {
+    const target = evt.target
+
+    if (!target.dataset.delete) {
+        return
+    }
+    const goods = JSON.parse(localStorage.getItem('goods'))
+    for (let i = 0; i < goods.length; i++) {
+        if (goods[i][4] > 0 && goods[i][0] === target.dataset.delete) {
+            goods[i].splice(3, 1, goods[i][3] + 1)
+            goods[i].splice(4, 1, goods[i][4] - 1)
+            localStorage.setItem('goods', JSON.stringify(goods))
+            update_goods()
+        }
+    }
 })
 
 update_goods()
