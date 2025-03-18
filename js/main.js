@@ -66,6 +66,29 @@ function update_goods() {
     document.querySelector('.price_result').innerHTML = result_price + '&#8381;'
 }
 
+function sortTable(colNum, type, id) {
+    const elem = document.getElementById(id)
+    const tbody = elem.querySelector('tbody')
+    const rowsArray = Array.from(tbody.rows)
+    let compare
+
+    switch(type) {
+        case 'number':
+            compare = function(rowA, rowB) {
+                return rowA.cells[colNum].innerHTML - rowB.cells[colNum].innerHTML
+            }
+            break
+
+            case 'string':
+            compare = function(rowA, rowB) {
+                return rowA.cells[colNum].innerHTML > rowB.cells[colNum].innerHTML ? 1 : -1
+            }
+            break
+    }
+    rowsArray.sort(compare)
+    tbody.append(...rowsArray)
+}
+
 document.querySelector('button.add_new').addEventListener('click', function(evt) {
     let name = document.getElementById('good_name').value
     let price = document.getElementById('good_price').value
@@ -157,5 +180,41 @@ document.querySelector('.cart').addEventListener('click', function(evt) {
         }
     }
 })
+
+document.querySelector('.cart').addEventListener('input', function(evt) {
+    const target = evt.target
+
+    if (!target.dataset.goodid) {
+        return
+    }
+
+    const goods = JSON.parse(localStorage.getItem('goods'))
+
+    for (let i = 0; i < goods.length; i++) {
+        if (goods[i][0] === target.dataset.goodid) {
+            goods[i][5] = target.value
+            goods[i][6] = goods[i][4] * goods[i][2] - goods[i][4]*goods[i][2]*goods[i][5]*0.01
+            localStorage.setItem('goods', JSON.stringify(goods))
+            update_goods()
+            const input = document.querySelector(`[data-goodid="${goods[i][0]}"]`)
+            input.focus()
+            input.selectionStart = input.value.length
+        }
+    }
+})
+
+table1.onclick = function(evt) {
+    const target = evt.target
+    if(target.tagName != 'TH') return
+    const th = target
+    sortTable(th.cellIndex, th.dataset.type, 'table1')
+}
+
+table2.onclick = function(evt) {
+    const target = evt.target
+    if(target.tagName != 'TH') return
+    const th = target
+    sortTable(th.cellIndex, th.dataset.type, 'table2')
+}
 
 update_goods()
